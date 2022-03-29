@@ -94,12 +94,12 @@ partial dictionary MediaTrackSettings {
        });
      } else {
        // The platform does not support background blurring.
-       // Let's use custom face to aid custom background blurring.
+       // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
        const transformer = new TransformStream({
          async transform(frame, controller) {
            // Use a custom face detection.
-           const detectedFaces = await detectedFaces(frame);
+           const detectedFaces = await detectFaces(frame);
            // Use a custom background blurring.
            const newFrame = await blurBackground(frame, detectedFaces);
            frame.close();
@@ -127,11 +127,11 @@ partial dictionary MediaTrackSettings {
 
 ## Security considerations
 
-Background Blur feature would not any more security concerns compared to a video call without it. Since there's a deamnd for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
+Background Blur feature would not add any more security concerns compared to a video call without it. Since there's a demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
 
 ## Privacy considerations
 
-Background Blur is supposed to enhance Privacy of the user compared to a video call without it. Many times users are in a video call where they do not know the audience well enough. It's advisable to not accidentally share any more personal information than required which might be otherwise be exposed without any form of Background Concealment. When in doubt, it's better to blur it out and users would change the blur intensity depending on who is on the other side of the call.
+Background Blur is supposed to enhance Privacy of the user compared to a video call without it. Many times users are in a video call where they do not know the audience well enough. It's advisable to not accidentally share any more personal information than required which might otherwise be exposed without any form of Background Concealment. When in doubt, it's better to blur it out and users would change the blur intensity depending on who is on the other side of the call.
 
 ## Stakeholder Feedback / Opposition
 
