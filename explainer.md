@@ -94,12 +94,12 @@ partial dictionary MediaTrackSettings {
        });
      } else {
        // The platform does not support background blurring.
-       // Let's use custom face to aid custom background blurring.
+       // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
        const transformer = new TransformStream({
          async transform(frame, controller) {
            // Use a custom face detection.
-           const detectedFaces = await detectedFaces(frame);
+           const detectedFaces = await detectFaces(frame);
            // Use a custom background blurring.
            const newFrame = await blurBackground(frame, detectedFaces);
            frame.close();
