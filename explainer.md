@@ -4,6 +4,7 @@
 
 - Rijubrata Bhaumik
 - Eero Häkkinen
+- Youenn Fablet
 
 ## Participate
 - github.com/riju/backgroundBlur/issues/
@@ -60,6 +61,19 @@ partial dictionary MediaTrackSettings {
   double backgroundBlur;
 };
 
+```
+
+## Exposing change of MediaStreamTrack configuration
+
+The configuration (capabilities, constraints or settings) of a MediaStreamTrack may be changed dynamically outside the control of web applications.
+One example is when a user decides to switch on background blur through the operating system.
+Web applications might want to know that the configuration of a particular MediaStreamTrack has changed.
+For that purpose, a new event is defined below.
+
+```js
+partial interface MediaStreamTrack {
+  attribute EventHandler onconfigurationchange;
+};
 ```
 
 ## Example
