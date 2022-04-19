@@ -32,6 +32,15 @@ On the Web, due to a lack of a stadardized JS API for Background Blur and widesp
 
 One adjacent goal was to combine Background Replacement with Background Blur as part of an overall Background Concealment API. Presently there's no platform APIs to support Background Replacement (green screen, animated gif, image, video). Combining both might be too premature. Instead, we would like to keep Background Replacement as a separate feature proposal for a later date.
 
+## Performance
+
+Background blur, using the proposed Javascript API, was compared to several other alternatives in power usage.
+The results were normalized against base case (viewfinder only, no background blur) and are shown in the following chart.
+
+![Package Power Consumption](ptat-bg5fps-rel.png)
+
+Javacript test programs were created to capture frames and to blur background at VGA resolution (640x480) at 5 fps. The tests were run on Intel Tigerlake running Windows 11. A test run length was 120 seconds (2 minutes) with 640x480 pixel frame resolution. 
+
 ## User research
 
 Feedback on API shape.
