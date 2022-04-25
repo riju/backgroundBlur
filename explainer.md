@@ -2,9 +2,9 @@
 
 ## Authors:
 
-- Rijubrata Bhaumik
-- Eero Häkkinen
-- Youenn Fablet
+- Rijubrata Bhaumik, Intel Corporation
+- Eero Häkkinen, Intel Corporation
+- Youenn Fablet, Apple Inc.
 
 ## Participate
 - github.com/riju/backgroundBlur/issues/
@@ -170,3 +170,15 @@ Many thanks for valuable feedback and advice from:
 - [Youenn Fablet]
 - [Dominique Hazael-Massieux]
 - [etc.]
+
+## Disclaimer
+
+Intel is committed to respecting human rights and avoiding complicity in human rights abuses. See Intel's Global Human Rights Principles. Intel's products and software are intended only to be used in applications that do not cause or contribute to a violation of an internationally recognized human right.
+
+Intel technologies may require enabled hardware, software or service activation.
+
+No product or component can be absolutely secure.
+
+Your costs and results may vary.
+
+© Intel Corporation
