@@ -22,7 +22,7 @@ On the Web, due to a lack of a standardized JS API for Background Blur and wides
 
 ## Goals
 
-* Ideally, Background Blur API should work with APIs like Face Detection. Face detection would help to either provide a mask (countour) or at least the bounding box co-ordinates which might help Background Blur to compute faster. In many cases platforms will do an in-stream correction and explicit face detection might not be needed at the browser level. In that case the detectedFaces options can be nullable.
+* Ideally, Background Blur API should work with APIs like [Face Detection](https://github.com/riju/faceDetection/blob/main/explainer.md#goals). Face detection would help to either provide a [mask (countour) or at least the bounding box co-ordinates](https://github.com/riju/faceDetection/blob/main/explainer.md#face-detection-api) which might help Background Blur to compute faster. In many cases platforms will do an in-stream correction and explicit face detection might not be needed at the browser level. In that case the detectedFaces options can be nullable.
 
 * Background Blur API should have options similar to what consumers demand, things possible on ML frameworks but not yet exposed by present day Platform APIs like Blur Level. Users might want to use blur intensity based on who they are communicating with.
 
