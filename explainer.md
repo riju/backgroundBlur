@@ -43,11 +43,17 @@ Javacript test programs were created to capture frames and to blur background at
 
 ## User research
 
-Feedback on API shape.
-* TEAMS
-* ZOOM
-* MEET
+* TEAMS : Supportive. Let’s start with a MVP and add Background Replacement feature later.
 
+*Agreed, [Background Replacement is now stated as Future Work](https://github.com/riju/backgroundBlur/blob/main/explainer.md#non-goals). 
+Some of the new features on Windows have [requirements](https://docs.microsoft.com/en-us/windows-hardware/drivers/stream/ksproperty-cameracontrol-extended-backgroundsegmentation#requirements) which might not be available to a lot of users right away, so we work on a minimal set which works on a broader set of clients and add newer features later.*
+
+
+* MEET : Supportive, but Segmentation Mask is a basic building block in MediaPipe.
+
+*We discussed that MASK would be more important in Background Replacement scenarios. Since no platform APIs support Background Replacement right now, we decided to move it to [future work](https://github.com/riju/backgroundBlur/blob/main/explainer.md#non-goals).*
+
+* Zoom : 
 
 ## Background Blur API
 
@@ -161,11 +167,8 @@ Background Blur is supposed to enhance Privacy of the user compared to a video c
 
 [Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
 
-- [Teams] : No signals
-- [Zoom] : No signals
-- [WebEx] : No signals
-- [Firefox] : No signals
-- [Safari] : No signals
+- [Firefox] : [No signals yet](https://lists.webkit.org/pipermail/webkit-dev/2022-June/032311.html) but Youenn (Apple) is co-author.
+- [Safari] : [No signals yet](https://github.com/mozilla/standards-positions/issues/658#ref-issue-1282189571) but approved by Jan-Ivar.
 
 [If appropriate, explain the reasons given by other implementors for their concerns.]
 
@@ -179,7 +182,7 @@ Many thanks for valuable feedback and advice from:
 - [Jan-Ivar Bruaroey]
 - [Youenn Fablet]
 - [Dominique Hazael-Massieux]
-- [etc.]
+
 
 ## Disclaimer
 
