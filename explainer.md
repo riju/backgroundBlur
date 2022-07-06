@@ -167,8 +167,8 @@ Background Blur is supposed to enhance Privacy of the user compared to a video c
 
 [Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
 
-- [Firefox] : [No signals yet](https://lists.webkit.org/pipermail/webkit-dev/2022-June/032311.html) but Youenn (Apple) is co-author.
-- [Safari] : [No signals yet](https://github.com/mozilla/standards-positions/issues/658#ref-issue-1282189571) but approved by Jan-Ivar.
+- [Safari] : [Positive](https://lists.webkit.org/pipermail/webkit-dev/2022-June/032311.html](https://lists.webkit.org/pipermail/webkit-dev/2022-July/032321.html)) Youenn (Apple) is co-author.
+- [Firefox] : [No signals yet](https://github.com/mozilla/standards-positions/issues/658#ref-issue-1282189571) but approved by Jan-Ivar.
 
 [If appropriate, explain the reasons given by other implementors for their concerns.]
 
