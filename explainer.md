@@ -66,15 +66,15 @@ partial dictionary MediaTrackSupportedConstraints {
 };
 
 partial dictionary MediaTrackCapabilities {
-  MediaSettingsRange backgroundBlur;
+  sequence<boolean> backgroundBlur;
 };
 
 partial dictionary MediaTrackConstraintSet {
-  MediaSettingsRange backgroundBlur;
+  ConstrainBoolean backgroundBlur;
 };
 
 partial dictionary MediaTrackSettings {
-  double backgroundBlur;
+  boolean backgroundBlur;
 };
 
 ```
@@ -115,12 +115,12 @@ partial interface MediaStreamTrack {
      let readable = processor.readable;
 
      const capabilities = videoTrack.getCapabilities();
-     if (capabilities.backgroundBlur && capabilities.backgroundBlur.max > 0) {
+     if ("backgroundBlur" in capabilities && capabilities.backgroundBlur.includes(true)) {
        // The platform supports background blurring.
        // Let's use platform background blurring.
        // No transformers are needed.
        await track.applyConstraints({
-         advanced: [{backgroundBlur: capabilities.backgroundBlur.max}]
+         advanced: [{backgroundBlur: true}]
        });
      } else {
        // The platform does not support background blurring.
