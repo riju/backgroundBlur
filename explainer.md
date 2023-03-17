@@ -182,6 +182,7 @@ Many thanks for valuable feedback and advice from:
 - [Jan-Ivar Bruaroey]
 - [Youenn Fablet]
 - [Dominique Hazael-Massieux]
+- [François Beaufort]
 
 
 ## Disclaimer
