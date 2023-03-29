@@ -102,7 +102,7 @@ partial interface MediaStreamTrack {
    ```js
    // main.js:
    // Open camera.
-   const stream = navigator.mediaDevices.getUserMedia({video: true});
+   const stream = await navigator.mediaDevices.getUserMedia({video: true});
    const [videoTrack] = stream.getVideoTracks();
 
    // Use a video worker and show to user.
@@ -115,16 +115,22 @@ partial interface MediaStreamTrack {
  * video-worker.js:
    ```js
    self.onmessage = async ({data: {videoTrack}}) => {
-     const processor = new MediaStreamTrackProcessor({videoTrack});
+     const processor = new MediaStreamTrackProcessor({track: videoTrack});
      let readable = processor.readable;
 
      const videoCapabilities = videoTrack.getCapabilities();
      if ((videoCapabilities.backgroundBlur || []).includes(true)) {
        // The platform supports background blurring and
        // allows it to be enabled.
-       // Let's use platform background blurring.
-       // No transformers are needed.
-       await track.applyConstraints({backgroundBlur: {exact: true}});
+       // Let's try use platform background blurring.
+       await track.applyConstraints({backgroundBlur: true});
+     }
+     const videoSettings = videoTrack.getSettings();
+     if (videoSettings.backgroundBlur) {
+       // Background blur is enabled.
+       // No transformer streams are needed.
+       // Pass the original track back to the main.
+       parent.postMessage({videoTrack}, [videoTrack]);
      } else {
        // The platform does not support background blurring or
        // does not allow it to be enabled.
@@ -140,19 +146,12 @@ partial interface MediaStreamTrack {
            controller.enqueue(newFrame);
          }
        });
-       // Pipe through a custom transformer.
-       readable = readable.pipeThrough(transformer);
-     };
-     if (readable === processor.readable) {
-       // No transformers were needed.
-       // Pass the original track back to the main.
-       parent.postMessage({videoTrack}, [videoTrack]);
-     } else {
-       // Transformers were needed.
+       // Transformer streams are needed.
        // Use a generator to generate a new video track and pass it to the main.
        const generator = new VideoTrackGenerator();
        parent.postMessage({videoTrack: generator.track}, [generator.track]);
-       await readable.pipeTo(generator.writable);
+       // Pipe through a custom transformer.
+       await readable.pipeThrough(transformer).pipeTo(generator.writable);
      }
    };
    ```
