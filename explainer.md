@@ -59,25 +59,26 @@ Some of the new features on Windows have [requirements](https://docs.microsoft.c
 
 This is about bringing platform background concealment capabilities to the web so constrainable media track capabilities fit naturally to the purpose. Because the concealment is (or should be) implemented by the platform media pipeline, it is enough for an (web) application to control the concealment through constrainable properties. The application does not have to (and actually cannot) do the actual concealment in this case. The concealment is already done before the application receives video frames. On Apple devices, Background Blur is controlled globally from Command Center and as such any app cannot independently switch on/off the feature. 
 
-* backgroundBlur.idl
-```js
-partial dictionary MediaTrackSupportedConstraints {
-  boolean backgroundBlur = true;
-};
+* WebIDL:
+  ```js
+  partial dictionary MediaTrackSupportedConstraints {
+    boolean backgroundBlur = true;
+  };
 
-partial dictionary MediaTrackCapabilities {
-  MediaSettingsRange backgroundBlur;
-};
+  partial dictionary MediaTrackCapabilities {
+    sequence<boolean> backgroundBlur;
+  };
 
-partial dictionary MediaTrackConstraintSet {
-  MediaSettingsRange backgroundBlur;
-};
+  partial dictionary MediaTrackConstraintSet {
+    ConstrainBoolean backgroundBlur;
+  };
 
-partial dictionary MediaTrackSettings {
-  double backgroundBlur;
-};
+  partial dictionary MediaTrackSettings {
+    boolean backgroundBlur;
+  };
+  ```
 
-```
+If a need for a more fine grained backgroud blur levels arises, the boolean _backgroundBlur_ constrainable property could be replaced with a DOMString _backgroundBlurMode_ constrainable property which could support values like `"off"`, `"light"` and `"heavy"`, for instance.
 
 ## Exposing change of MediaStreamTrack configuration
 
@@ -115,15 +116,12 @@ partial interface MediaStreamTrack {
      let readable = processor.readable;
 
      const videoCapabilities = videoTrack.getCapabilities();
-     if (videoCapabilities.backgroundBlur &&
-         videoCapabilities.backgroundBlur.max > 0) {
+     if ((videoCapabilities.backgroundBlur || []).includes(true)) {
        // The platform supports background blurring and
        // allows it to be enabled.
        // Let's use platform background blurring.
        // No transformers are needed.
-       await track.applyConstraints({
-         backgroundBlur: {exact: capabilities.backgroundBlur.max}
-       });
+       await track.applyConstraints({backgroundBlur: {exact: true}});
      } else {
        // The platform does not support background blurring or
        // does not allow it to be enabled.
@@ -156,7 +154,6 @@ partial interface MediaStreamTrack {
    };
    ```
 [PR](https://github.com/w3c/mediacapture-extensions/pull/49)
-
 
 ## Security considerations
 
