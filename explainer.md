@@ -159,7 +159,15 @@ partial interface MediaStreamTrack {
 
 ## Security considerations
 
-Background Blur feature would not expose any more security concerns compared to a video call without it. Since there's demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
+Background Blur feature does not expose any more security concerns compared to a video call without it. Since there's demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
+
+The support for background blur is a track invariant. Web applications cannot affect it. Tracks which originates from `MediaDevices.getUserMedia()` may support background blur if the selected camera and the platform support it. Tracks which originates from other sources do not support background blur.
+
+The background blur capability (a boolean sequence describing whether it is possible to enable and/or to disable the background blur) is provided by the User-Agent and cannot be modified by web applications. It may however change for instance if the user uses operating system controls to enforce background blur or to remove such an enforcement.
+
+The background blur constraints are provided by web applications by passing them to `navigator.mediaDevices.getUserMedia()` or to `MediaStreamTrack.applyConstraints()`. Constraints allow web applications to change settings within the bounds of capabilities.
+
+The current background blur setting (a boolean describing whether background blur is currently in effect) is provided by the User-Agent. It may change if the user uses operating system controls to disable or to enable background blur but also if web applications uses `MediaStreamTrack.applyConstraints()` to select a supported background blur setting other than the current one. If the background blur capability does not include multiple supported boolean settings, web applications cannot change the background blur setting.
 
 ## Privacy considerations
 
