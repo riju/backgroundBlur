@@ -104,7 +104,7 @@ partial interface MediaStreamTrack {
    // Use a video worker and show to user.
    const videoElement = document.querySelector('video');
    const videoWorker = new Worker('video-worker.js');
-   videoWorker.postMessage({videoTrack: videoTrack}, [videoTrack]);
+   videoWorker.postMessage({videoTrack}, [videoTrack]);
    const {data} = await new Promise(r => videoWorker.onmessage);
    videoElement.srcObject = new MediaStream([data.videoTrack]);
    ```
@@ -114,16 +114,19 @@ partial interface MediaStreamTrack {
      const processor = new MediaStreamTrackProcessor({videoTrack});
      let readable = processor.readable;
 
-     const capabilities = videoTrack.getCapabilities();
-     if (capabilities.backgroundBlur && capabilities.backgroundBlur.max > 0) {
-       // The platform supports background blurring.
+     const videoCapabilities = videoTrack.getCapabilities();
+     if (videoCapabilities.backgroundBlur &&
+         videoCapabilities.backgroundBlur.max > 0) {
+       // The platform supports background blurring and
+       // allows it to be enabled.
        // Let's use platform background blurring.
        // No transformers are needed.
        await track.applyConstraints({
-         advanced: [{backgroundBlur: capabilities.backgroundBlur.max}]
+         backgroundBlur: {exact: capabilities.backgroundBlur.max}
        });
      } else {
-       // The platform does not support background blurring.
+       // The platform does not support background blurring or
+       // does not allow it to be enabled.
        // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
        const transformer = new TransformStream({
@@ -142,7 +145,7 @@ partial interface MediaStreamTrack {
      if (readable === processor.readable) {
        // No transformers were needed.
        // Pass the original track back to the main.
-       parent.postMessage({videoTrack: videoTrack}, [videoTrack]);
+       parent.postMessage({videoTrack}, [videoTrack]);
      } else {
        // Transformers were needed.
        // Use a generator to generate a new video track and pass it to the main.
