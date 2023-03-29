@@ -153,7 +153,7 @@ partial interface MediaStreamTrack {
      }
    };
    ```
-[PR](https://github.com/w3c/mediacapture-extensions/pull/49)
+[PR](https://github.com/w3c/mediacapture-extensions/pull/61)
 
 ## Security considerations
 
