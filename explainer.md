@@ -172,6 +172,21 @@ The current background blur setting (a boolean describing whether background blu
 
 Background Blur is supposed to enhance Privacy of the user compared to a video call without it. Many times users are in a video call where they do not know the audience well enough. It's advisable to not accidentally share any more personal information than required which might be otherwise be exposed without any form of Background Concealment. When in doubt, it's better to blur it out and users would change the blur intensity depending on who is on the other side of the call.
 
+### Fingerprinting
+
+If a site does not have [permissions](https://w3c.github.io/permissions/), background blur provides practically no fingerprinting posibilities.
+The only provided information is `navigator.mediaDevices.getSupportedConstraints().backgroundBlur` which either is true (if the User-Agent supports background blur in general irrespective of whether the device has a camera or a platform version which support background blur) or does not exist.
+That same information can most probably obtained also by other means like from the User-Agent string.
+
+If a site utilizes `navigator.mediaDevices.getUserMedia({video: {}})` which resolves only after the user has [granted](https://w3c.github.io/permissions/#dfn-granted) the ["camera"](https://www.w3.org/TR/mediacapture-streams/#dfn-camera) permission, the returned video tracks may have `backgroundBlur` capabilities and settings.
+The `backgroundBlur` capability can be either non-existing, `[false]`, `[true]` or `[false, true]` and the setting can be either non-existing, false or true.
+Based on the capability, it is possible to determine if the platform is one which allows application only to observe background blur setting changes or one which allows applications also to set the background blur setting.
+In essence, this splits operating systems to two groups but does not differentiate between platform versions.
+
+All the frames for which background is blurred originate from cameras.
+No methods are provided for sites to insert frames for background blurring.
+As such, sites cannot fingerprint the background blur implementation as the sites have no access to original frames and have access to blurred frames only if the user has the user has [granted](https://w3c.github.io/permissions/#dfn-granted) the ["camera"](https://www.w3.org/TR/mediacapture-streams/#dfn-camera) permission.
+
 ## Stakeholder Feedback / Opposition
 
 [Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
