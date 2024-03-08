@@ -64,18 +64,18 @@ This is about bringing platform background concealment capabilities to the web s
     boolean backgroundBlur = true;
   };
 
-  partial dictionary MediaTrackCapabilities {
-    sequence<boolean> backgroundBlur;
-  };
+partial dictionary MediaTrackCapabilities {
+  sequence<boolean> backgroundBlur;
+};
 
-  partial dictionary MediaTrackConstraintSet {
-    ConstrainBoolean backgroundBlur;
-  };
+partial dictionary MediaTrackConstraintSet {
+  ConstrainBoolean backgroundBlur;
+};
 
-  partial dictionary MediaTrackSettings {
-    boolean backgroundBlur;
-  };
-  ```
+partial dictionary MediaTrackSettings {
+  boolean backgroundBlur;
+};
+
 
 [PR](https://github.com/w3c/mediacapture-extensions/pull/61)
 
@@ -118,19 +118,15 @@ partial interface MediaStreamTrack {
      const processor = new MediaStreamTrackProcessor({track: videoTrack});
      let readable = processor.readable;
 
-     const videoCapabilities = videoTrack.getCapabilities();
-     if ((videoCapabilities.backgroundBlur || []).includes(true)) {
-       // The platform supports background blurring and
-       // allows it to be enabled.
-       // Let's try use platform background blurring.
-       await videoTrack.applyConstraints({backgroundBlur: true});
-     }
-     const videoSettings = videoTrack.getSettings();
-     if (videoSettings.backgroundBlur) {
-       // Background blur is enabled.
-       // No transformer streams are needed.
-       // Pass the original track back to the main.
-       parent.postMessage({videoTrack}, [videoTrack]);
+     const capabilities = videoTrack.getCapabilities();
+     if ("backgroundBlur" in capabilities && capabilities.backgroundBlur.includes(true)) {
+       // The platform supports background blurring.
+       // Let's use platform background blurring.
+       // No transformers are needed.
+       await track.applyConstraints({
+         advanced: [{backgroundBlur: true}]
+       });
+
      } else {
        // The platform does not support background blurring or
        // does not allow it to be enabled.
