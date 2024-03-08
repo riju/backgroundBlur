@@ -59,11 +59,10 @@ Some of the new features on Windows have [requirements](https://docs.microsoft.c
 
 This is about bringing platform background concealment capabilities to the web so constrainable media track capabilities fit naturally to the purpose. Because the concealment is (or should be) implemented by the platform media pipeline, it is enough for an (web) application to control the concealment through constrainable properties. The application does not have to (and actually cannot) do the actual concealment in this case. The concealment is already done before the application receives video frames. On Apple devices, Background Blur is controlled globally from Command Center and as such any app cannot independently switch on/off the feature. 
 
-* backgroundBlur.idl
 ```js
-partial dictionary MediaTrackSupportedConstraints {
-  boolean backgroundBlur = true;
-};
+  partial dictionary MediaTrackSupportedConstraints {
+    boolean backgroundBlur = true;
+  };
 
 partial dictionary MediaTrackCapabilities {
   sequence<boolean> backgroundBlur;
@@ -77,7 +76,10 @@ partial dictionary MediaTrackSettings {
   boolean backgroundBlur;
 };
 
-```
+
+[PR](https://github.com/w3c/mediacapture-extensions/pull/61)
+
+If a need for a more fine grained backgroud blur levels arises, the boolean _backgroundBlur_ constrainable property could be replaced with a DOMString _backgroundBlurMode_ constrainable property which could support values like `"off"`, `"light"` and `"heavy"`, for instance.
 
 ## Exposing change of MediaStreamTrack configuration
 
@@ -92,26 +94,28 @@ partial interface MediaStreamTrack {
 };
 ```
 
+[PR](https://github.com/w3c/mediacapture-extensions/pull/61)
+
 ## Example
 
  * main.js:
    ```js
    // main.js:
    // Open camera.
-   const stream = navigator.mediaDevices.getUserMedia({video: true});
+   const stream = await navigator.mediaDevices.getUserMedia({video: true});
    const [videoTrack] = stream.getVideoTracks();
 
    // Use a video worker and show to user.
    const videoElement = document.querySelector('video');
    const videoWorker = new Worker('video-worker.js');
-   videoWorker.postMessage({videoTrack: videoTrack}, [videoTrack]);
+   videoWorker.postMessage({videoTrack}, [videoTrack]);
    const {data} = await new Promise(r => videoWorker.onmessage);
    videoElement.srcObject = new MediaStream([data.videoTrack]);
    ```
  * video-worker.js:
    ```js
    self.onmessage = async ({data: {videoTrack}}) => {
-     const processor = new MediaStreamTrackProcessor({videoTrack});
+     const processor = new MediaStreamTrackProcessor({track: videoTrack});
      let readable = processor.readable;
 
      const capabilities = videoTrack.getCapabilities();
@@ -122,8 +126,10 @@ partial interface MediaStreamTrack {
        await track.applyConstraints({
          advanced: [{backgroundBlur: true}]
        });
+
      } else {
-       // The platform does not support background blurring.
+       // The platform does not support background blurring or
+       // does not allow it to be enabled.
        // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
        const transformer = new TransformStream({
@@ -136,39 +142,53 @@ partial interface MediaStreamTrack {
            controller.enqueue(newFrame);
          }
        });
-       // Pipe through a custom transformer.
-       readable = readable.pipeThrough(transformer);
-     };
-     if (readable === processor.readable) {
-       // No transformers were needed.
-       // Pass the original track back to the main.
-       parent.postMessage({videoTrack: videoTrack}, [videoTrack]);
-     } else {
-       // Transformers were needed.
+       // Transformer streams are needed.
        // Use a generator to generate a new video track and pass it to the main.
        const generator = new VideoTrackGenerator();
        parent.postMessage({videoTrack: generator.track}, [generator.track]);
-       await readable.pipeTo(generator.writable);
+       // Pipe through a custom transformer.
+       await readable.pipeThrough(transformer).pipeTo(generator.writable);
      }
    };
    ```
-[PR](https://github.com/w3c/mediacapture-extensions/pull/49)
-
 
 ## Security considerations
 
-Background Blur feature would not expose any more security concerns compared to a video call without it. Since there's demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
+Background Blur feature does not expose any more security concerns compared to a video call without it. Since there's demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
+
+The support for background blur is a track invariant. Web applications cannot affect it. Tracks which originates from `MediaDevices.getUserMedia()` may support background blur if the selected camera and the platform support it. Tracks which originates from other sources do not support background blur.
+
+The background blur capability (a boolean sequence describing whether it is possible to enable and/or to disable the background blur) is provided by the User-Agent and cannot be modified by web applications. It may however change for instance if the user uses operating system controls to enforce background blur or to remove such an enforcement.
+
+The background blur constraints are provided by web applications by passing them to `navigator.mediaDevices.getUserMedia()` or to `MediaStreamTrack.applyConstraints()`. Constraints allow web applications to change settings within the bounds of capabilities.
+
+The current background blur setting (a boolean describing whether background blur is currently in effect) is provided by the User-Agent. It may change if the user uses operating system controls to disable or to enable background blur but also if web applications uses `MediaStreamTrack.applyConstraints()` to select a supported background blur setting other than the current one. If the background blur capability does not include multiple supported boolean settings, web applications cannot change the background blur setting.
 
 ## Privacy considerations
 
 Background Blur is supposed to enhance Privacy of the user compared to a video call without it. Many times users are in a video call where they do not know the audience well enough. It's advisable to not accidentally share any more personal information than required which might be otherwise be exposed without any form of Background Concealment. When in doubt, it's better to blur it out and users would change the blur intensity depending on who is on the other side of the call.
 
+### Fingerprinting
+
+If a site does not have [permissions](https://w3c.github.io/permissions/), background blur provides practically no fingerprinting posibilities.
+The only provided information is `navigator.mediaDevices.getSupportedConstraints().backgroundBlur` which either is true (if the User-Agent supports background blur in general irrespective of whether the device has a camera or a platform version which support background blur) or does not exist.
+That same information can most probably obtained also by other means like from the User-Agent string.
+
+If a site utilizes `navigator.mediaDevices.getUserMedia({video: {}})` which resolves only after the user has [granted](https://w3c.github.io/permissions/#dfn-granted) the ["camera"](https://www.w3.org/TR/mediacapture-streams/#dfn-camera) permission, the returned video tracks may have `backgroundBlur` capabilities and settings.
+The `backgroundBlur` capability can be either non-existing, `[false]`, `[true]` or `[false, true]` and the setting can be either non-existing, false or true.
+Based on the capability, it is possible to determine if the platform is one which allows application only to observe background blur setting changes or one which allows applications also to set the background blur setting.
+In essence, this splits operating systems to two groups but does not differentiate between platform versions.
+
+All the frames for which background is blurred originate from cameras.
+No methods are provided for sites to insert frames for background blurring.
+As such, sites cannot fingerprint the background blur implementation as the sites have no access to original frames and have access to blurred frames only if the user has the user has [granted](https://w3c.github.io/permissions/#dfn-granted) the ["camera"](https://www.w3.org/TR/mediacapture-streams/#dfn-camera) permission.
+
 ## Stakeholder Feedback / Opposition
 
 [Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
 
-- [Firefox] : [No signals yet](https://lists.webkit.org/pipermail/webkit-dev/2022-June/032311.html) but Youenn (Apple) is co-author.
-- [Safari] : [No signals yet](https://github.com/mozilla/standards-positions/issues/658#ref-issue-1282189571) but approved by Jan-Ivar.
+- [Safari] : [Positive](https://lists.webkit.org/pipermail/webkit-dev/2022-July/032321.html) Youenn (Apple) is co-author.
+- [Firefox] : [Positive](https://github.com/mozilla/standards-positions/issues/658#issuecomment-1477070865).
 
 [If appropriate, explain the reasons given by other implementors for their concerns.]
 
@@ -182,6 +202,7 @@ Many thanks for valuable feedback and advice from:
 - [Jan-Ivar Bruaroey]
 - [Youenn Fablet]
 - [Dominique Hazael-Massieux]
+- [François Beaufort]
 
 
 ## Disclaimer
