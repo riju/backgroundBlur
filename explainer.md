@@ -123,7 +123,7 @@ partial interface MediaStreamTrack {
        // The platform supports background blurring and
        // allows it to be enabled.
        // Let's try use platform background blurring.
-       await track.applyConstraints({backgroundBlur: true});
+       await videoTrack.applyConstraints({backgroundBlur: true});
      }
      const videoSettings = videoTrack.getSettings();
      if (videoSettings.backgroundBlur) {
