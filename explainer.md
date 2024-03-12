@@ -1,4 +1,4 @@
-# Background Blur
+# Background Blur & Mask
 
 ## Authors:
 
@@ -39,13 +39,13 @@ The results were normalized against base case (viewfinder only, no background bl
 
 ![Package Power Consumption](ptat-bg5fps-rel.png)
 
-Javacript test programs were created to capture frames and to blur background at VGA resolution (640x480) at 5 fps. The tests were run on Intel Tigerlake running Windows 11. A test run length was 120 seconds (2 minutes) with 640x480 pixel frame resolution. 
+Javacript test programs were created to capture frames and to blur background at VGA resolution (640x480) at 5 fps. The tests were run on Intel Tigerlake running Windows 11. A test run length was 120 seconds (2 minutes) with 640x480 pixel frame resolution.
 
 ## User research
 
 * TEAMS : Supportive. Let’s start with a MVP and add Background Replacement feature later.
 
-*Agreed, [Background Replacement is now stated as Future Work](https://github.com/riju/backgroundBlur/blob/main/explainer.md#non-goals). 
+*Agreed, [Background Replacement is now stated as Future Work](https://github.com/riju/backgroundBlur/blob/main/explainer.md#non-goals).
 Some of the new features on Windows have [requirements](https://docs.microsoft.com/en-us/windows-hardware/drivers/stream/ksproperty-cameracontrol-extended-backgroundsegmentation#requirements) which might not be available to a lot of users right away, so we work on a minimal set which works on a broader set of clients and add newer features later.*
 
 
@@ -53,16 +53,16 @@ Some of the new features on Windows have [requirements](https://docs.microsoft.c
 
 *We discussed that MASK would be more important in Background Replacement scenarios. Since no platform APIs support Background Replacement right now, we decided to move it to [future work](https://github.com/riju/backgroundBlur/blob/main/explainer.md#non-goals).*
 
-* Zoom : 
+* Zoom :
 
 ## Background Blur API
 
-This is about bringing platform background concealment capabilities to the web so constrainable media track capabilities fit naturally to the purpose. Because the concealment is (or should be) implemented by the platform media pipeline, it is enough for an (web) application to control the concealment through constrainable properties. The application does not have to (and actually cannot) do the actual concealment in this case. The concealment is already done before the application receives video frames. On Apple devices, Background Blur is controlled globally from Command Center and as such any app cannot independently switch on/off the feature. 
+This is about bringing platform background concealment capabilities to the web so constrainable media track capabilities fit naturally to the purpose. Because the concealment is (or should be) implemented by the platform media pipeline, it is enough for a web application to control the concealment through constrainable properties. The application does not have to (and actually cannot) do the actual concealment in this case. The concealment is already done before the application receives video frames. On Apple devices, Background Blur is controlled globally from Command Center and as such any app cannot independently switch on/off the feature.
 
 ```js
-  partial dictionary MediaTrackSupportedConstraints {
-    boolean backgroundBlur = true;
-  };
+partial dictionary MediaTrackSupportedConstraints {
+  boolean backgroundBlur = true;
+};
 
 partial dictionary MediaTrackCapabilities {
   sequence<boolean> backgroundBlur;
@@ -75,11 +75,41 @@ partial dictionary MediaTrackConstraintSet {
 partial dictionary MediaTrackSettings {
   boolean backgroundBlur;
 };
-
+```
 
 [PR](https://github.com/w3c/mediacapture-extensions/pull/61)
 
 If a need for a more fine grained backgroud blur levels arises, the boolean _backgroundBlur_ constrainable property could be replaced with a DOMString _backgroundBlurMode_ constrainable property which could support values like `"off"`, `"light"` and `"heavy"`, for instance.
+
+## Background Segmentation Mask API
+
+This is about bringing platform background segmentation capabilities to the web so constrainable media track capabilities fit naturally to the purpose. Because the segmentation is (or should be) implemented by the platform media pipeline, it is enough for a web application to control the segmentation through constrainable properties. In this case, the application must do the actual concealment by itself based on normal and background mask video frames which can be classified as such using video frame metadata.
+
+```js
+partial dictionary MediaTrackSupportedConstraints {
+  boolean backgroundMask = true;
+};
+
+partial dictionary MediaTrackCapabilities {
+  sequence<boolean> backgroundMask;
+};
+
+partial dictionary MediaTrackConstraintSet {
+  ConstrainBoolean backgroundMask;
+};
+
+partial dictionary MediaTrackSettings {
+  boolean backgroundMask;
+};
+
+partial dictionary VideoFrameCallbackMetadata
+  boolean backgroundMask;
+};
+
+partial dictionary VideoFrameMetadata {
+  boolean backgroundMask;
+};
+```
 
 ## Exposing change of MediaStreamTrack configuration
 
@@ -124,18 +154,33 @@ partial interface MediaStreamTrack {
        // Let's use platform background blurring.
        // No transformers are needed.
        await track.applyConstraints({
-         advanced: [{backgroundBlur: true}]
+         backgroundBlur: {exact: true}
        });
-
+       // Pass the same video track back to the main.
+       parent.postMessage({videoTrack}, [videoTrack]);
      } else {
        // The platform does not support background blurring or
        // does not allow it to be enabled.
        // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
+       if ("backgroundMask" in capabilities && capabilities.backgroundMask.includes(true)) {
+         // The platform supports background segmentation mask.
+         // Let's use it to aid face detection.
+         await track.applyConstraints({
+           backgroundMask: {exact: true}
+         });
+       }
+       let maskFrame = null;
        const transformer = new TransformStream({
          async transform(frame, controller) {
+           if (frame.metadata().backgroundMask) {
+             if (maskFrame)
+               maskFrame.close();
+             maskFrame = frame;
+             continue;
+           }
            // Use a custom face detection.
-           const detectedFaces = await detectFaces(frame);
+           const detectedFaces = await detectFaces(frame, maskFrame);
            // Use a custom background blurring.
            const newFrame = await blurBackground(frame, detectedFaces);
            frame.close();
@@ -148,6 +193,8 @@ partial interface MediaStreamTrack {
        parent.postMessage({videoTrack: generator.track}, [generator.track]);
        // Pipe through a custom transformer.
        await readable.pipeThrough(transformer).pipeTo(generator.writable);
+       if (maskFrame)
+         maskFrame.close();
      }
    };
    ```
