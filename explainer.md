@@ -32,6 +32,8 @@ On the Web, due to a lack of a standardized JS API for Background Blur and wides
 
 One adjacent goal was to combine Background Replacement with Background Blur as part of an overall Background Concealment API. Presently there's no platform APIs to support Background Replacement (green screen, animated gif, image, video). Combining both might be too premature. Instead, we would like to keep Background Replacement as a separate feature proposal for a later date.
 
+**Update:** Platforms have added APIs for **Background Segmentation MASK**, where we can get access to background mask metadata. Using this information, developers can create features like Green Screen and Transparent Background or other Background Replacement techniques.
+
 ## Performance
 
 Background blur, using the proposed Javascript API, was compared to several other alternatives in power usage.
