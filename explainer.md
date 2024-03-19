@@ -204,89 +204,89 @@ partial interface MediaStreamTrack {
 ## Background Segmentation Mask Example: Green Background
 ```js
 window.addEventListener('DOMContentLoaded', async event => {
-	const stream = await navigator.mediaDevices.getUserMedia({video: true});
-	const [videoTrack] = stream.getVideoTracks();
-	const videoCapabilities = videoTrack.getCapabilities();
-	if ((videoCapabilities.backgroundMask || []).includes(true)) {
-		await videoTrack.applyConstraints({backgroundMask: {exact: true}});
-	} else {
-		// No background mask support. Do something else.
-	}
-	const videoSettings = videoTrack.getSettings();
-	const videoProcessor = new MediaStreamTrackProcessor({track: videoTrack});
-	const videoGenerator = new MediaStreamTrackGenerator({kind: 'video'});
-	const videoElement = document.querySelector('video');
-	videoElement.srcObject = new MediaStream([videoGenerator]);
-	await videoProcessor.readable
-		.pipeThrough(new TransformStream({
-			start(controller) {
-				console.log('start');
-				this.height = videoSettings.height;
-				this.width = videoSettings.width;
-				this.backgroundCanvas = new OffscreenCanvas(this.width, this.height);
-				this.canvas = new OffscreenCanvas(this.width, this.height);
-				this.maskFrame = null;
-			},
-			transform(videoFrame, controller) {
-				// If the video frame is a mask frame,
-				// store it for a later use.
-				if (videoFrame.metadata && videoFrame.metadata().backgroundMask) {
-					if (this.maskFrame)
-						this.maskFrame.close();
-					this.maskFrame = videoFrame;
-					return;
-				}
+  const stream = await navigator.mediaDevices.getUserMedia({video: true});
+  const [videoTrack] = stream.getVideoTracks();
+  const videoCapabilities = videoTrack.getCapabilities();
+  if ((videoCapabilities.backgroundMask || []).includes(true)) {
+    	await videoTrack.applyConstraints({backgroundMask: {exact: true}});
+  } else {
+    // No background mask support. Do something else.
+  }
+  const videoSettings = videoTrack.getSettings();
+  const videoProcessor = new MediaStreamTrackProcessor({track: videoTrack});
+  const videoGenerator = new MediaStreamTrackGenerator({kind: 'video'});
+  const videoElement = document.querySelector('video');
+  videoElement.srcObject = new MediaStream([videoGenerator]);
+  await videoProcessor.readable
+    .pipeThrough(new TransformStream({
+      start(controller) {
+        console.log('start');
+        this.height = videoSettings.height;
+        this.width = videoSettings.width;
+        this.backgroundCanvas = new OffscreenCanvas(this.width, this.height);
+        this.canvas = new OffscreenCanvas(this.width, this.height);
+        this.maskFrame = null;
+      },
+      transform(videoFrame, controller) {
+        // If the video frame is a mask frame,
+        // store it for a later use.
+        if (videoFrame.metadata && videoFrame.metadata().backgroundMask) {
+          if (this.maskFrame)
+            this.maskFrame.close();
+          this.maskFrame = videoFrame;
+          return;
+        }
 
-				if (this.maskFrame) {
-					const backgroundContext = this.backgroundCanvas.getContext('2d');
-					const context = this.canvas.getContext('2d');
+        if (this.maskFrame) {
+          const backgroundContext = this.backgroundCanvas.getContext('2d');
+          const context = this.canvas.getContext('2d');
 
-					// Draw a green background and a black foreground:
-					// Invert and draw the mask frame.
-					backgroundContext.globalCompositeOperation = 'copy';
-					backgroundContext.fillStyle = 'white';
-					backgroundContext.fillRect(0, 0, this.width, this.height);
-					backgroundContext.globalCompositeOperation = 'difference';
-					backgroundContext.drawImage(this.maskFrame, 0, 0);
-					// Draw the background color.
-					backgroundContext.globalCompositeOperation = 'multiply';
-					backgroundContext.fillStyle = 'lime';
-					backgroundContext.fillRect(0, 0, this.width, this.height);
+          // Draw a green background and a black foreground:
+          // Invert and draw the mask frame.
+          backgroundContext.globalCompositeOperation = 'copy';
+          backgroundContext.fillStyle = 'white';
+          backgroundContext.fillRect(0, 0, this.width, this.height);
+          backgroundContext.globalCompositeOperation = 'difference';
+          backgroundContext.drawImage(this.maskFrame, 0, 0);
+          // Draw the background color.
+          backgroundContext.globalCompositeOperation = 'multiply';
+          backgroundContext.fillStyle = 'lime';
+          backgroundContext.fillRect(0, 0, this.width, this.height);
 
-					// Draw the foreground and a black background:
-					// Draw the mask frame.
-					context.globalCompositeOperation = 'copy';
-					context.drawImage(this.maskFrame, 0, 0);
-					// Draw the foreground from the video frame.
-					context.globalCompositeOperation = 'multiply';
-					context.drawImage(videoFrame, 0, 0);
+          // Draw the foreground and a black background:
+          // Draw the mask frame.
+          context.globalCompositeOperation = 'copy';
+          context.drawImage(this.maskFrame, 0, 0);
+          // Draw the foreground from the video frame.
+          context.globalCompositeOperation = 'multiply';
+          context.drawImage(videoFrame, 0, 0);
 
-					// Combine the foreground and the green background.
-					context.globalCompositeOperation = 'lighter';
-					context.drawImage(this.backgroundCanvas, 0, 0);
+          // Combine the foreground and the green background.
+          context.globalCompositeOperation = 'lighter';
+          context.drawImage(this.backgroundCanvas, 0, 0);
 
-					this.maskFrame.close();
-					this.maskFrame = null;
-				} else {
-					// Draw green.
-					const context = this.canvas.getContext('2d');
-					context.globalCompositeOperation = 'copy';
-					context.fillStyle = 'lime';
-					context.fillRect(0, 0, this.width, this.height);
-				}
+          this.maskFrame.close();
+          this.maskFrame = null;
+        } else {
+          // Draw green.
+          const context = this.canvas.getContext('2d');
+          context.globalCompositeOperation = 'copy';
+          context.fillStyle = 'lime';
+          context.fillRect(0, 0, this.width, this.height);
+        }
 
-				// Create and enqueue a new video frame.
-				const {timestamp} = videoFrame;
-				videoFrame.close();
-				controller.enqueue(new VideoFrame(this.canvas, {timestamp}));
-			},
-			flush(controller) {
-				console.log('flush');
-				if (this.maskFrame)
-					this.maskFrame.close();
-			}
-		}))
-		.pipeTo(videoGenerator.writable);
+        // Create and enqueue a new video frame.
+        const {timestamp} = videoFrame;
+        videoFrame.close();
+        controller.enqueue(new VideoFrame(this.canvas, {timestamp}));
+      },
+      flush(controller) {
+        console.log('flush');
+        if (this.maskFrame)
+          this.maskFrame.close();
+      }
+    }))
+    .pipeTo(videoGenerator.writable);
 });
 ```
 
