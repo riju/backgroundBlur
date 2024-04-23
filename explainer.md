@@ -290,6 +290,12 @@ window.addEventListener('DOMContentLoaded', async event => {
 });
 ```
 
+## Demo
+https://github.com/riju/backgroundBlur/assets/975872/27b320aa-ee66-48ee-968f-3f0a11c75d38
+
+[Demo Page](https://github.eero.xn--hkkinen-5wa.fi/web-platform-demos/mediacapture/background-segmentation-mask/) by [@eehakkin](https://github.com/eehakkin)
+Inspired by [webrtcHacks](https://github.com/webrtcHacks/transparent-virtual-background/tree/master), thanks [@fippo](https://github.com/fippo) and [@chadwallacehart](https://github.com/chadwallacehart)
+
 ## Security considerations
 
 Background Blur feature does not expose any more security concerns compared to a video call without it. Since there's demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
