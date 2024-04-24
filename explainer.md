@@ -112,6 +112,18 @@ partial dictionary VideoFrameMetadata {
   boolean backgroundMask;
 };
 ```
+## Blur vs Mask 
+In terms of API shape, both the BG Blur and the BG MASK have similar (but separate) Media Stream Track Capabilities, Constraints and Settings. There is some implementation difference -
+
+* BG Blur preprocesses video frames and replaces the original video frames with ones with background blurred thus the original video frames become unavailable from a web application point of view (until BG Blur is disabled) 
+
+* BG MASK retains the original frames intact, does segmentation and provides mask frames in addition to the original video frames thus web applications receive both the original frames and mask frames in the same video frame stream (effectively doubling the frame rate) 
+
+In BG MASK, web applications must be able to separate the original video frames from mask frames and for that, we are adding a boolean to VideoFrameMetadata. 
+
+As an implementation detail, masks get interleaved in the stream, the order is first masked frame, then original frame. Could the actual frame be provided with metadata instead of providing it as a different frame.
+
+TODO(eero) : Explore alpha channel. Webcodecs does not support alpha chanel today.
 
 ## Exposing change of MediaStreamTrack configuration
 
@@ -296,6 +308,9 @@ https://github.com/riju/backgroundBlur/assets/975872/27b320aa-ee66-48ee-968f-3f0
 [Demo Page](https://github.eero.xn--hkkinen-5wa.fi/web-platform-demos/mediacapture/background-segmentation-mask/) by [@eehakkin](https://github.com/eehakkin)
 Inspired by [webrtcHacks](https://github.com/webrtcHacks/transparent-virtual-background/tree/master), thanks [@fippo](https://github.com/fippo) and [@chadwallacehart](https://github.com/chadwallacehart)
 
+#### Implementation Detail :
+The demo uses transform streams to preprocess frames before displaying them on a video element. The demo always keeps the last mask frame but does not pass them to the video element (except for demo purposes). Whenever the demo receives an original video frame, the demo uses that frame and the last mask frame to create a new video frame with foreground colored with a foreground overlay color (blue by default) and enqueues that to be passed to the video element instead of the original (and the mask) frames.
+
 ## Security considerations
 
 Background Blur feature does not expose any more security concerns compared to a video call without it. Since there's demand for Background Blur many products use a cloud based solution to satisfy conformance across a myriad of client devices. Modern clients are quite efficient these days to handle such popular tasks like Background Blur, either by leveraging AI accelerators or using specific vector instructions like AVX.
@@ -347,6 +362,7 @@ Many thanks for valuable feedback and advice from:
 - [Youenn Fablet]
 - [Dominique Hazael-Massieux]
 - [François Beaufort]
+- [Elad Alon]
 
 
 ## Disclaimer
