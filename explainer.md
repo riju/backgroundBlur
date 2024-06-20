@@ -109,7 +109,7 @@ partial dictionary VideoFrameCallbackMetadata
 };
 
 partial dictionary VideoFrameMetadata {
-  boolean backgroundSegmentationMask;
+  ImageBitmap backgroundSegmentationMask;
 };
 ```
 ## Blur vs Mask 
@@ -200,17 +200,12 @@ partial interface MediaStreamTrack {
            backgroundSegmentationMask: {exact: true}
          });
        }
-       let maskFrame = null;
        const transformer = new TransformStream({
          async transform(frame, controller) {
-           if (frame.metadata().backgroundSegmentationMask) {
-             if (maskFrame)
-               maskFrame.close();
-             maskFrame = frame;
-             continue;
-           }
            // Use a custom face detection.
-           const detectedFaces = await detectFaces(frame, maskFrame);
+           const detectedFaces = await detectFaces(
+               frame,
+               frame.metadata().backgroundSegmentationMask);
            // Use a custom background blurring.
            const newFrame = await blurBackground(frame, detectedFaces);
            frame.close();
@@ -223,8 +218,6 @@ partial interface MediaStreamTrack {
        parent.postMessage({videoTrack: generator.track}, [generator.track]);
        // Pipe through a custom transformer.
        await readable.pipeThrough(transformer).pipeTo(generator.writable);
-       if (maskFrame)
-         maskFrame.close();
      }
    };
    ```
@@ -255,19 +248,12 @@ window.addEventListener('DOMContentLoaded', async event => {
         this.width = videoSettings.width;
         this.backgroundCanvas = new OffscreenCanvas(this.width, this.height);
         this.canvas = new OffscreenCanvas(this.width, this.height);
-        this.maskFrame = null;
       },
       transform(videoFrame, controller) {
-        // If the video frame is a mask frame,
-        // store it for a later use.
-        if (videoFrame.metadata && videoFrame.metadata().backgroundSegmentationMask) {
-          if (this.maskFrame)
-            this.maskFrame.close();
-          this.maskFrame = videoFrame;
-          return;
-        }
+        const backgroundSegmentationMask =
+            videoFrame.metadata().backgroundSegmentationMask;
 
-        if (this.maskFrame) {
+        if (backgroundSegmentationMask) {
           const backgroundContext = this.backgroundCanvas.getContext('2d');
           const context = this.canvas.getContext('2d');
 
@@ -277,7 +263,7 @@ window.addEventListener('DOMContentLoaded', async event => {
           backgroundContext.fillStyle = 'white';
           backgroundContext.fillRect(0, 0, this.width, this.height);
           backgroundContext.globalCompositeOperation = 'difference';
-          backgroundContext.drawImage(this.maskFrame, 0, 0);
+          backgroundContext.drawImage(backgroundSegmentationMask, 0, 0);
           // Draw the background color.
           backgroundContext.globalCompositeOperation = 'multiply';
           backgroundContext.fillStyle = 'lime';
@@ -286,7 +272,7 @@ window.addEventListener('DOMContentLoaded', async event => {
           // Draw the foreground and a black background:
           // Draw the mask frame.
           context.globalCompositeOperation = 'copy';
-          context.drawImage(this.maskFrame, 0, 0);
+          context.drawImage(backgroundSegmentationMask, 0, 0);
           // Draw the foreground from the video frame.
           context.globalCompositeOperation = 'multiply';
           context.drawImage(videoFrame, 0, 0);
@@ -294,9 +280,6 @@ window.addEventListener('DOMContentLoaded', async event => {
           // Combine the foreground and the green background.
           context.globalCompositeOperation = 'lighter';
           context.drawImage(this.backgroundCanvas, 0, 0);
-
-          this.maskFrame.close();
-          this.maskFrame = null;
         } else {
           // Draw green.
           const context = this.canvas.getContext('2d');
@@ -309,11 +292,6 @@ window.addEventListener('DOMContentLoaded', async event => {
         const {timestamp} = videoFrame;
         videoFrame.close();
         controller.enqueue(new VideoFrame(this.canvas, {timestamp}));
-      },
-      flush(controller) {
-        console.log('flush');
-        if (this.maskFrame)
-          this.maskFrame.close();
       }
     }))
     .pipeTo(videoGenerator.writable);
