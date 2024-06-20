@@ -89,27 +89,27 @@ This is about bringing platform background segmentation capabilities to the web 
 
 ```js
 partial dictionary MediaTrackSupportedConstraints {
-  boolean backgroundMask = true;
+  boolean backgroundSegmentationMask = true;
 };
 
 partial dictionary MediaTrackCapabilities {
-  sequence<boolean> backgroundMask;
+  sequence<boolean> backgroundSegmentationMask;
 };
 
 partial dictionary MediaTrackConstraintSet {
-  ConstrainBoolean backgroundMask;
+  ConstrainBoolean backgroundSegmentationMask;
 };
 
 partial dictionary MediaTrackSettings {
-  boolean backgroundMask;
+  boolean backgroundSegmentationMask;
 };
 
 partial dictionary VideoFrameCallbackMetadata
-  boolean backgroundMask;
+  boolean backgroundSegmentationMask;
 };
 
 partial dictionary VideoFrameMetadata {
-  boolean backgroundMask;
+  boolean backgroundSegmentationMask;
 };
 ```
 ## Blur vs Mask 
@@ -193,17 +193,17 @@ partial interface MediaStreamTrack {
        // does not allow it to be enabled.
        // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
-       if ("backgroundMask" in capabilities && capabilities.backgroundMask.includes(true)) {
+       if ("backgroundSegmentationMask" in capabilities && capabilities.backgroundSegmentationMask.includes(true)) {
          // The platform supports background segmentation mask.
          // Let's use it to aid face detection.
          await track.applyConstraints({
-           backgroundMask: {exact: true}
+           backgroundSegmentationMask: {exact: true}
          });
        }
        let maskFrame = null;
        const transformer = new TransformStream({
          async transform(frame, controller) {
-           if (frame.metadata().backgroundMask) {
+           if (frame.metadata().backgroundSegmentationMask) {
              if (maskFrame)
                maskFrame.close();
              maskFrame = frame;
@@ -235,8 +235,8 @@ window.addEventListener('DOMContentLoaded', async event => {
   const stream = await navigator.mediaDevices.getUserMedia({video: true});
   const [videoTrack] = stream.getVideoTracks();
   const videoCapabilities = videoTrack.getCapabilities();
-  if ((videoCapabilities.backgroundMask || []).includes(true)) {
-    	await videoTrack.applyConstraints({backgroundMask: {exact: true}});
+  if ((videoCapabilities.backgroundSegmentationMask || []).includes(true)) {
+    	await videoTrack.applyConstraints({backgroundSegmentationMask: {exact: true}});
   } else {
     // No background mask support. Do something else.
   }
@@ -258,7 +258,7 @@ window.addEventListener('DOMContentLoaded', async event => {
       transform(videoFrame, controller) {
         // If the video frame is a mask frame,
         // store it for a later use.
-        if (videoFrame.metadata && videoFrame.metadata().backgroundMask) {
+        if (videoFrame.metadata && videoFrame.metadata().backgroundSegmentationMask) {
           if (this.maskFrame)
             this.maskFrame.close();
           this.maskFrame = videoFrame;
