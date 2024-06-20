@@ -179,7 +179,7 @@ partial interface MediaStreamTrack {
      let readable = processor.readable;
 
      const capabilities = videoTrack.getCapabilities();
-     if ("backgroundBlur" in capabilities && capabilities.backgroundBlur.includes(true)) {
+     if ((capabilities.backgroundBlur || []).includes(true)) {
        // The platform supports background blurring.
        // Let's use platform background blurring.
        // No transformers are needed.
@@ -193,7 +193,7 @@ partial interface MediaStreamTrack {
        // does not allow it to be enabled.
        // Let's use custom face detection to aid custom background blurring.
        importScripts('custom-face-detection.js', 'custom-background-blur.js');
-       if ("backgroundSegmentationMask" in capabilities && capabilities.backgroundSegmentationMask.includes(true)) {
+       if ((capabilities.backgroundSegmentationMask || []).includes(true)) {
          // The platform supports background segmentation mask.
          // Let's use it to aid face detection.
          await track.applyConstraints({
