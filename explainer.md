@@ -236,9 +236,11 @@ window.addEventListener('DOMContentLoaded', async event => {
   const [videoTrack] = stream.getVideoTracks();
   const videoCapabilities = videoTrack.getCapabilities();
   if ((videoCapabilities.backgroundSegmentationMask || []).includes(true)) {
-    	await videoTrack.applyConstraints({backgroundSegmentationMask: {exact: true}});
+    await videoTrack.applyConstraints({
+      backgroundSegmentationMask: {exact: true}
+    });
   } else {
-    // No background mask support. Do something else.
+    // No background segmentation mask support. Do something else.
   }
   const videoSettings = videoTrack.getSettings();
   const videoProcessor = new MediaStreamTrackProcessor({track: videoTrack});
