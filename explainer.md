@@ -125,6 +125,20 @@ As an implementation detail, masks get interleaved in the stream, the order is f
 
 TODO(eero) : Explore alpha channel. Webcodecs does not support alpha chanel today.
 
+## Mask Data -- VideoFrame / ImageBitmap / ImageData
+How to present the Mask data ? 
+* **VideoFrame** : VideoFrame for WebCodec and HTMLVideoElement are the only elements supported by WebGPU zero copy path via [importExternalTexture](https://www.w3.org/TR/webgpu/#dom-gpudevice-importexternaltexture).
+  - Maybe not for majority users, but in some cases, with high resolution cameras, it's possible that the VideoFrame can be 4K and BG Segementation/Mask can be 4K too. Other than that, CPU residency is good enough.
+
+[Elad](https://github.com/w3c/mediacapture-extensions/pull/142#discussion_r1600063736), [Jan-Ivar](https://github.com/w3c/mediacapture-extensions/pull/142#discussion_r1628541641) and [Eugene](https://www.w3.org/2024/06/18-mediawg-minutes.html#t04) think VideoFrame is not needed for this use case.
+    
+
+* **ImageData** or **ImageBitmap** has the same back resource support.
+  - ImageData has a data readonly attribute which is better than ImageBitmap. ImageBitmap always relies on others to readback contents.
+  -	2D canvas also exposes a API named [putImageData()](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/putImageData) to upload contents without conversions(e.g. alpha related ). ImageBitmap could only rely on the draw call and some conversions might happens (e.g. alpha)	
+
+Thanks @shaoboyan @eladalon1983 @Djuffin
+
 ## Exposing change of MediaStreamTrack configuration
 
 The configuration (capabilities, constraints or settings) of a MediaStreamTrack may be changed dynamically outside the control of web applications.
@@ -363,6 +377,7 @@ Many thanks for valuable feedback and advice from:
 - [Dominique Hazael-Massieux]
 - [François Beaufort]
 - [Elad Alon]
+- [Shaobo Yan]
 
 
 ## Disclaimer
