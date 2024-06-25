@@ -127,7 +127,7 @@ TODO(eero) : Explore alpha channel. Webcodecs does not support alpha chanel toda
 
 ## Mask Data -- VideoFrame / ImageBitmap / ImageData
 How to present the Mask data ? 
-* **VideoFrame** : VideoFrame for WebCodec and HTMLVideoElement are the only elements supported by WebGPU zero copy path via [importExternalTexture](https://www.w3.org/TR/webgpu/#dom-gpudevice-importexternaltexture).
+* **VideoFrame** : VideoFrame for WebCodec and HTMLVideoElement are the only elements supported by WebGPU zero copy path via [importExternalTexture](https://www.w3.org/TR/webgpu/#dom-gpudevice-importexternaltexture).  [WebCodecs integration](https://developer.chrome.com/blog/new-in-webgpu-116#webcodecs_integration) adds support for using a ```VideoFrame``` as the source for a [GPUExternalTexture](https://developer.mozilla.org/en-US/docs/Web/API/GPUExternalTexture) and a [copyExternalImageToTexture()](https://developer.mozilla.org/en-US/docs/Web/API/GPUQueue/copyExternalImageToTexture) call. 
   - Maybe not for majority users, but in some cases, with high resolution cameras, it's possible that the VideoFrame can be 4K and BG Segementation/Mask can be 4K too. Other than that, CPU residency is good enough.
 
 [Elad](https://github.com/w3c/mediacapture-extensions/pull/142#discussion_r1600063736), [Jan-Ivar](https://github.com/w3c/mediacapture-extensions/pull/142#discussion_r1628541641) and [Eugene](https://www.w3.org/2024/06/18-mediawg-minutes.html#t04) think VideoFrame is not needed for this use case.
