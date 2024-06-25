@@ -133,9 +133,11 @@ How to present the Mask data ?
 [Elad](https://github.com/w3c/mediacapture-extensions/pull/142#discussion_r1600063736), [Jan-Ivar](https://github.com/w3c/mediacapture-extensions/pull/142#discussion_r1628541641) and [Eugene](https://www.w3.org/2024/06/18-mediawg-minutes.html#t04) think VideoFrame is not needed for this use case.
     
 
-* **ImageData** or **ImageBitmap** has the same back resource support.
+* **ImageData** or **ImageBitmap** has the same CPU back resource support.
   - ImageData has a data readonly attribute which is better than ImageBitmap. ImageBitmap always relies on others to readback contents.
-  -	2D canvas also exposes a API named [putImageData()](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/putImageData) to upload contents without conversions(e.g. alpha related ). ImageBitmap could only rely on the draw call and some conversions might happens (e.g. alpha)	
+  - ImageData requires data to be in RGBA format in an `Uint8ClampedArray` which always requires a conversion from a grayscale source.
+  -	2D canvas also exposes a API named [putImageData()](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/putImageData) to upload contents without conversions(e.g. alpha related ). ImageBitmap could only rely on the draw call and some conversions might happens (e.g. alpha)
+  -	ImageBitmap has flexible support also for formats other than RGBA and also for GPU texture back resources.
 
 Thanks @shaoboyan @eladalon1983 @Djuffin
 
