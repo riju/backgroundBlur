@@ -41,7 +41,7 @@ The results were normalized against base case (viewfinder only, no background bl
 
 ![Package Power Consumption](ptat-bg5fps-rel.png)
 
-Javacript test programs were created to capture frames and to blur background at VGA resolution (640x480) at 5 fps. The tests were run on Intel Tigerlake running Windows 11. A test run length was 120 seconds (2 minutes) with 640x480 pixel frame resolution.
+Javacript test programs were created to capture frames and to blur background at VGA resolution (640x480) at 5 fps. The tests were run on Intel Tigerlake running Windows 11. A test run length was 120 seconds (2 minutes) with 640x480 pixel frame resolution. Please check [Disclaimer](#disclaimer).
 
 ## User research
 
@@ -366,10 +366,12 @@ Many thanks for valuable feedback and advice from:
 
 Intel is committed to respecting human rights and avoiding complicity in human rights abuses. See Intel's Global Human Rights Principles. Intel's products and software are intended only to be used in applications that do not cause or contribute to a violation of an internationally recognized human right.
 
+Performance varies by use, configuration and other factors. Learn more on the Performance Index site. 
+
+Performance results are based on testing as of dates shown in configurations and may not reflect all publicly available updates.  See backup for configuration details.  No product or component can be absolutely secure. 
+
+Your costs and results may vary. 
+
 Intel technologies may require enabled hardware, software or service activation.
 
-No product or component can be absolutely secure.
-
-Your costs and results may vary.
-
-© Intel Corporation
+© Intel Corporation.  Intel, the Intel logo, and other Intel marks are trademarks of Intel Corporation or its subsidiaries.  Other names and brands may be claimed as the property of others. 
