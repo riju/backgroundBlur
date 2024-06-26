@@ -39,9 +39,29 @@ One adjacent goal was to combine Background Replacement with Background Blur as 
 Background blur, using the proposed Javascript API, was compared to several other alternatives in power usage.
 The results were normalized against base case (viewfinder only, no background blur) and are shown in the following chart.
 
-![Package Power Consumption](ptat-bg5fps-rel.png)
+![Package Power Consumption](MTL_BG_Blur_HP_best_ower_efficiency.png)
 
-Javacript test programs were created to capture frames and to blur background at VGA resolution (640x480) at 5 fps. The tests were run on Intel Tigerlake running Windows 11. A test run length was 120 seconds (2 minutes) with 640x480 pixel frame resolution. Please check [Disclaimer](#disclaimer).
+* _Tool_ : Intel Power and Therman Analysis Tool (PTAT). 
+* _Date of testing_  : May 2024
+* _System configuration_ : HP Spectre x360 Intel Core Ultra 7 155H
+* _Relevant testing/workload setup_  : 
+640x480 pixel frame resolution
+Windows > Settings > System > Power & battery > Power mode 
+The tests were repeated at “Best power efficiency” power profile. 
+
+[TF.js](https://storage.googleapis.com/tfjs-models/demos/body-pix/index.html) 
+
+  -  Architecture: MobileNetV1 and Resnet50  
+  -  Estimate: segmentation 
+  -  Effect: bokeh 
+
+[Mediapipe](https://storage.googleapis.com/tfjs-models/demos/segmentation/index.html?model=selfie_segmentation)
+
+  -  Model: MediaPipeSelfieSegmentation 
+  -  Visualization: bokehEffect 
+  -  Runtime-backend: mediapipe-gpu  
+
+Please check [Disclaimer](#disclaimer).
 
 ## User research
 
