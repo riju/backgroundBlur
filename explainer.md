@@ -37,7 +37,6 @@ One adjacent goal was to combine Background Replacement with Background Blur as 
 ## Performance
 
 Background blur, using the proposed Javascript API, was compared to several other alternatives in power usage.
-The results were normalized against base case (viewfinder only, no background blur) and are shown in the following chart.
 
 ![Package Power Consumption](MTL_BG_Blur_HP_best_ower_efficiency.png)
 
