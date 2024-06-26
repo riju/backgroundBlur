@@ -53,6 +53,8 @@ The tests were repeated at “Best power efficiency” power profile.
   -  Architecture: MobileNetV1 and Resnet50  
   -  Estimate: segmentation 
   -  Effect: bokeh 
+  -  TF.js MobileNetV1 : FPS ~ 15
+  -  TF.js ResNet50: FPS ~ 10
 
 [Mediapipe](https://storage.googleapis.com/tfjs-models/demos/segmentation/index.html?model=selfie_segmentation)
 
